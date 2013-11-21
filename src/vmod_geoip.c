@@ -1,5 +1,6 @@
 /**/
 #include <stdlib.h>
+#include <ctype.h>
 #include <GeoIP.h>
 
 #include "vrt.h"
@@ -36,6 +37,14 @@ init_function(struct vmod_priv *priv, const struct VCL_conf *conf)
     return (0);
 }
 
+static void strtolower(char *c) {
+    for (; *c; c++) {
+        if (isupper(*c)) {
+            *c = tolower(*c);
+        }
+    }
+}
+
 const char *
 vmod_country(struct sess *sp, const char *ip)
 {
@@ -56,7 +65,12 @@ vmod_country(struct sess *sp, const char *ip)
     if (!country) {
       country= unknownCountry;
     }
-    cp= WS_Dup(sp->wrk->ws, country);
+
+    char lowerCountry[2];
+    strcpy(lowerCountry, country);
+    strtolower(lowerCountry);
+
+    cp= WS_Dup(sp->wrk->ws, (const char *)lowerCountry);
 
     return(cp);
 }
